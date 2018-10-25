@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ParametresActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="PARAMETRES"
+        android:gravity="center"/>
+
+    <Switch
+        android:id="@+id/localisation"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Autoriser la localisation"/>
+
+    <Switch
+        android:id="@+id/voix"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Autoriser la voix"/>
+
+    <Button
+        android:id="@+id/home"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Retour page principale"/>
+</LinearLayout>
