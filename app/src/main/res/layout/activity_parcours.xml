@@ -6,6 +6,51 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ParcoursActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#424a5d">
+
+    <LinearLayout
+        android:id="@+id/boutonsLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/dislike"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:text="Je n'aime pas ce parcours"
+            android:layout_weight="1.0"
+            android:background="#ffd777"/>
+
+        <Button
+            android:id="@+id/start"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:text="Start"
+            android:background="#ffd777"/>
+
+        <Button
+            android:id="@+id/pause"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:text="Pause"
+            android:background="#ffd777"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/stop"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:text="Stop"
+            android:background="#ffd777"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
 
 </LinearLayout>

@@ -45,7 +45,6 @@ public class PagePrincipale extends AppCompatActivity {
             final EditText distance = (EditText) dialog.findViewById(R.id.distance);
             final LinearLayout distanceLayout = (LinearLayout) dialog.findViewById(R.id.distanceLayout);
 
-            // if button is clicked, close the custom dialog
             validerButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
