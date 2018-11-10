@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FeedbackActivity"
+    android:orientation="vertical"
+    android:background="#424a5d">
+
+    <TextView
+        android:id="@+id/duree"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Durée : 30 minutes"/>
+
+    <TextView
+        android:id="@+id/distanceParcourue"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Distance parcourue : 5 km"/>
+
+    <TextView
+        android:id="@+id/vitesse"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Vitesse moyenne : 10 km/h"/>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Noter le parcours : "/>
+
+    <RatingBar
+        android:id="@+id/note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5" />
+
+    <Button
+        android:id="@+id/validerFeedback"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Valider le feedback " />
+
+</LinearLayout>

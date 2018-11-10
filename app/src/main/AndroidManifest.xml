@@ -17,7 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ParametresActivity" />
-        <activity android:name=".ParcoursActivity"></activity>
+        <activity android:name=".ParcoursActivity" />
+        <activity android:name=".FeedbackActivity"></activity>
     </application>
 
 </manifest>

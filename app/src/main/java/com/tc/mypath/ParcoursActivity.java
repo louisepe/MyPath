@@ -4,14 +4,17 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class ParcoursActivity extends AppCompatActivity {
@@ -22,10 +25,11 @@ public class ParcoursActivity extends AppCompatActivity {
     private Button pause;
     private Button stop;
     int erreur = 0;
-    private LinearLayout parcoursLayout;
+    private RelativeLayout parcoursLayout;
     private LinearLayout boutonsLayout;
     private ImageView parcours;
-
+    private Chronometer chrono;
+    private long time = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,8 @@ public class ParcoursActivity extends AppCompatActivity {
         start = (Button) findViewById(R.id.start);
         pause = (Button) findViewById(R.id.pause);
         stop = (Button) findViewById(R.id.stop);
+
+        chrono = (Chronometer) findViewById(R.id.chrono);
 
         start.setOnClickListener(startListener);
         pause.setOnClickListener(pauseListener);
@@ -48,29 +54,23 @@ public class ParcoursActivity extends AppCompatActivity {
         parcoursLayout = findViewById(R.id.parcoursLayout);
         boutonsLayout = findViewById(R.id.boutonsLayout);
 
-        parcours= new ImageView(this);
+        parcours = (ImageView) findViewById(R.id.imageParcours);
 
         if(distance < 7){
             parcours.setImageResource(R.drawable.parcours5_1km);
-            parcoursLayout.addView(parcours);
         }
         else if(distance >= 7 && distance < 10){
             parcours.setImageResource(R.drawable.parcours9_0km);
-            parcoursLayout.addView(parcours);
         }
         else if(distance >= 10 && distance < 12.5){
             parcours.setImageResource(R.drawable.parcours11_3km);
-            parcoursLayout.addView(parcours);
         }
         else if(distance >= 12.5 && distance < 15.5){
             parcours.setImageResource(R.drawable.parcours14_3km);
-            parcoursLayout.addView(parcours);
         }
         else{
             parcours.setImageResource(R.drawable.parcours17_3km);
-            parcoursLayout.addView(parcours);
         }
-
     }
 
     OnClickListener startListener = new OnClickListener() {
@@ -80,6 +80,8 @@ public class ParcoursActivity extends AppCompatActivity {
             dislike.setVisibility(View.GONE);
             stop.setVisibility(View.GONE);
             pause.setVisibility(View.VISIBLE);
+            chrono.setBase(SystemClock.elapsedRealtime() - time);
+            chrono.start();
         }
     };
 
@@ -90,6 +92,8 @@ public class ParcoursActivity extends AppCompatActivity {
             start.setText("Reprendre");
             start.setVisibility(View.VISIBLE);
             stop.setVisibility(View.VISIBLE);
+            time = SystemClock.elapsedRealtime() - chrono.getBase();
+            chrono.stop();
         }
     };
 
@@ -103,8 +107,12 @@ public class ParcoursActivity extends AppCompatActivity {
     OnClickListener stopListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            //AFFICHER LE FEEDBACK
-            Intent myIntent = new Intent(v.getContext(), PagePrincipale.class);
+            //time = ( SystemClock.elapsedRealtime() - chrono.getBase())/1000;
+            time = time/1000;
+            String tempsText = time/3600 + ":" + (int)((time%3600)/60) + ":" + (int)((time%3600)%60);
+            chrono.stop();
+            Intent myIntent = new Intent(v.getContext(), FeedbackActivity.class);
+            myIntent.putExtra("time", tempsText);
             startActivityForResult(myIntent,0);
         }
     };
