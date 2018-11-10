@@ -30,6 +30,7 @@ public class ParcoursActivity extends AppCompatActivity {
     private ImageView parcours;
     private Chronometer chrono;
     private long time = 0;
+    double distance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +50,7 @@ public class ParcoursActivity extends AppCompatActivity {
         stop.setOnClickListener(stopListener);
 
         Intent myIntent = getIntent();
-        double distance = myIntent.getDoubleExtra("distance", 0.00);
+        distance = myIntent.getDoubleExtra("distance", 0.00);
 
         parcoursLayout = findViewById(R.id.parcoursLayout);
         boutonsLayout = findViewById(R.id.boutonsLayout);
@@ -113,6 +114,8 @@ public class ParcoursActivity extends AppCompatActivity {
             chrono.stop();
             Intent myIntent = new Intent(v.getContext(), FeedbackActivity.class);
             myIntent.putExtra("time", tempsText);
+            myIntent.putExtra("distance", distance);
+            myIntent.putExtra( "tempsSecondes", time);
             startActivityForResult(myIntent,0);
         }
     };

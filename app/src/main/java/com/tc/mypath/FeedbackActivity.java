@@ -11,11 +11,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 public class FeedbackActivity extends AppCompatActivity {
 
     final Context context = this;
     private Button validerFeedback;
     private TextView temps;
+    private TextView distanceParcourue;
+    private TextView vitesse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,11 +28,18 @@ public class FeedbackActivity extends AppCompatActivity {
 
         Intent myIntent = getIntent();
         String time = myIntent.getStringExtra("time");
+        double distance = myIntent.getDoubleExtra("distance", 0.0);
+        long tempsSecondes = myIntent.getLongExtra("tempsSecondes", 0);
 
         validerFeedback = (Button) findViewById(R.id.validerFeedback);
 
         temps = (TextView) findViewById(R.id.duree);
+        distanceParcourue = (TextView) findViewById(R.id.distanceParcourue);
+        vitesse = (TextView) findViewById(R.id.vitesse);
+
         temps.setText("Durée : " + time );
+        distanceParcourue.setText("Distance parcourue : " + distance + "km");
+        vitesse.setText("Vitesse moyenne : " + (distance/tempsSecondes)*3600 + "km/h");
 
         validerFeedback.setOnClickListener(validerListener);
     }

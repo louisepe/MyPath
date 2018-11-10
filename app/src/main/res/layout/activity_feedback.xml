@@ -12,35 +12,41 @@
         android:id="@+id/duree"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Durée : 30 minutes"/>
+        android:text="Durée : 30 minutes"
+        android:textColor="#f3f0ea"/>
 
     <TextView
         android:id="@+id/distanceParcourue"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Distance parcourue : 5 km"/>
+        android:text="Distance parcourue : 5 km"
+        android:textColor="#f3f0ea"/>
 
     <TextView
         android:id="@+id/vitesse"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Vitesse moyenne : 10 km/h"/>
+        android:text="Vitesse moyenne : 10 km/h"
+        android:textColor="#f3f0ea"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Noter le parcours : "/>
+        android:text="Noter le parcours : "
+        android:textColor="#f3f0ea"/>
 
     <RatingBar
         android:id="@+id/note"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:numStars="5" />
+        android:numStars="5"
+        android:textColor="#f3f0ea"/>
 
     <Button
         android:id="@+id/validerFeedback"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Valider le feedback " />
+        android:text="Valider le feedback "
+        android:background="#ffd777"/>
 
 </LinearLayout>
