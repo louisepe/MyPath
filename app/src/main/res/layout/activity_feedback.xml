@@ -32,6 +32,34 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:text="Problèmes rencontrés sur le parcours :"
+        android:textColor="#f3f0ea"/>
+
+
+    <CheckBox
+        android:id="@+id/travaux"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Travaux"
+        android:textColor="#f3f0ea"/>
+
+    <CheckBox
+        android:id="@+id/marche"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Marché"
+        android:textColor="#f3f0ea"/>
+
+    <CheckBox
+        android:id="@+id/impraticable"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Chemin difficilement praticable"
+        android:textColor="#f3f0ea"/>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:text="Noter le parcours : "
         android:textColor="#f3f0ea"/>
 

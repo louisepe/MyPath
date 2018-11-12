@@ -37,7 +37,6 @@ public class PagePrincipale extends AppCompatActivity {
     OnClickListener genererListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            // custom dialog
             final Dialog dialog = new Dialog(context);
             dialog.setContentView(R.layout.parametres_parcours);
 

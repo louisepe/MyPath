@@ -39,7 +39,7 @@ public class FeedbackActivity extends AppCompatActivity {
 
         temps.setText("Durée : " + time );
         distanceParcourue.setText("Distance parcourue : " + distance + "km");
-        vitesse.setText("Vitesse moyenne : " + (distance/tempsSecondes)*3600 + "km/h");
+        vitesse.setText("Vitesse moyenne : " + (int)((distance/tempsSecondes)*3600) + "km/h");
 
         validerFeedback.setOnClickListener(validerListener);
     }

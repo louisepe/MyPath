@@ -101,7 +101,38 @@ public class ParcoursActivity extends AppCompatActivity {
     OnClickListener dislikeListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            //REOUVRIR LE POP UP DE GENERATION DE PARCOURS
+            final Dialog dialog = new Dialog(context);
+            dialog.setContentView(R.layout.parametres_parcours);
+
+            Button validerButton = (Button) dialog.findViewById(R.id.validerParams);
+            final EditText distance = (EditText) dialog.findViewById(R.id.distance);
+            final LinearLayout distanceLayout = (LinearLayout) dialog.findViewById(R.id.distanceLayout);
+
+            validerButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    if(distance.getText().toString().equals("") || distance.getText().toString().equals("0")){
+                        if(erreur == 0){
+                            TextView error= new TextView(context);
+                            error.setText("Vous devez entrer une distance supérieure à 0");
+                            error.setTextColor(Color.parseColor("#FF0000"));
+                            distanceLayout.addView(error);
+                            erreur=1;
+                        }
+
+                    }
+                    else{
+                        erreur=0;
+                        Intent myIntent = new Intent(v.getContext(), ParcoursActivity.class);
+                        myIntent.putExtra("distance", Double.parseDouble(distance.getText().toString()));
+                        startActivityForResult(myIntent,0);
+                        dialog.hide();
+                    }
+                }
+            });
+
+            dialog.show();
         }
     };
 
