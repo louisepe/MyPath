@@ -18,7 +18,19 @@
         android:maxHeight="42dp"
         android:scaleType="fitCenter"
         android:src="@drawable/logo"
-        android:layout_marginBottom="60dp"/>
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="5dp"/>
+
+
+    <TextView
+        android:id="@+id/nom"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:layout_marginBottom="30dp"
+        android:textColor="#f3f0ea"
+        />
 
     <Button
         android:id="@+id/generer"
@@ -61,5 +73,16 @@
         android:text="Mon Profil"
         android:layout_marginBottom="20dp"
         android:layout_marginHorizontal="60dp"/>
+
+    <Button
+        android:id="@+id/deconnexion"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffd777"
+        android:gravity="center"
+        android:text="Deconnexion"
+        android:layout_marginBottom="20dp"
+        android:layout_marginHorizontal="60dp"/>
+
 
 </LinearLayout>

@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Chronometer;
+ import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;

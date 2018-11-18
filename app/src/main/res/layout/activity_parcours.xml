@@ -64,6 +64,7 @@
         android:layout_alignParentBottom="true"
         android:gravity="center"
         android:textColor="#f3f0ea"
+        android:textSize="30dp"
         android:layout_weight="0" />
 
 </RelativeLayout>
