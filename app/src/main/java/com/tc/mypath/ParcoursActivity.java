@@ -9,7 +9,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -21,6 +26,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import org.osmdroid.api.IMapController;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,6 +53,13 @@ public class ParcoursActivity extends AppCompatActivity {
     private Chronometer chrono;
     private long time = 0;
     double distance;
+    private MapView mapView;
+    IMapController MapController = null;
+    private LocationManager locationManager;
+    private LocationListener listener;
+    //private Button button;
+    MyLocationNewOverlay myLocationOverlay;
+    private Context contextMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +73,46 @@ public class ParcoursActivity extends AppCompatActivity {
 
         chrono = (Chronometer) findViewById(R.id.chrono);
 
+        //Localisation
+        mapView = (MapView) findViewById(R.id.mapView);
+        mapView.setTileSource(TileSourceFactory.MAPNIK);
+
+        mapView.setBuiltInZoomControls(true);
+        mapView.setMultiTouchControls(true);
+        IMapController mapController = mapView.getController();
+        mapController.setZoom(18.5);
+        contextMap=getApplicationContext();
+        this.myLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(contextMap),mapView);
+        this.myLocationOverlay.enableMyLocation();
+        mapView.getOverlays().add(this.myLocationOverlay);
+        myLocationOverlay.enableFollowLocation();
+        final TextView textView = (TextView) findViewById(R.id.text);
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        listener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                //textView.append("n " + location.getLongitude() + " " + location.getLatitude());
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+
+                Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(i);
+            }
+        };
+
+        //FIN LOCALISATION
         start.setOnClickListener(startListener);
         pause.setOnClickListener(pauseListener);
         dislike.setOnClickListener(dislikeListener);
@@ -98,8 +157,11 @@ public class ParcoursActivity extends AppCompatActivity {
             dislike.setVisibility(View.GONE);
             stop.setVisibility(View.GONE);
             pause.setVisibility(View.VISIBLE);
+            parcours.setVisibility(View.GONE);
+            mapView.setVisibility(View.VISIBLE);
             chrono.setBase(SystemClock.elapsedRealtime() - time);
             chrono.start();
+
         }
     };
 
@@ -184,4 +246,19 @@ public class ParcoursActivity extends AppCompatActivity {
             startActivityForResult(myIntent,0);
         }
     };
+
+    public void onResume(){
+        super.onResume();
+        Configuration.getInstance().load(getApplicationContext(), PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+        if (mapView!=null)
+            mapView.onResume();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Configuration.getInstance().save(getApplicationContext(), PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+        if (mapView!=null)
+            mapView.onPause();
+    }
 }

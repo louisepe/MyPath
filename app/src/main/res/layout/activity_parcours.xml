@@ -9,12 +9,28 @@
     android:orientation="vertical"
     android:background="#424a5d">
 
+    <ImageView
+        android:id="@+id/imageParcours"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"/>
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/mapView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:visibility="gone"
+        tools:ignore="ExtraText"
+        tilesource="Mapnik" />
+
     <LinearLayout
         android:id="@+id/boutonsLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true">
 
         <Button
             android:id="@+id/dislike"
@@ -52,18 +68,13 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imageParcours"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
     <Chronometer
         android:id="@+id/chrono"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center"
-        android:textColor="#f3f0ea"
+        android:textColor="#000000"
         android:textSize="30dp"
         android:layout_weight="0" />
 
