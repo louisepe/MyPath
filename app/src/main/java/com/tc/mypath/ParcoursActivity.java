@@ -2,8 +2,13 @@ package com.tc.mypath;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +21,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class ParcoursActivity extends AppCompatActivity {
 
@@ -72,6 +82,13 @@ public class ParcoursActivity extends AppCompatActivity {
         else{
             parcours.setImageResource(R.drawable.parcours17_3km);
         }
+
+    }
+
+    void renameFile (String oldFile, String newFile){
+        File oldfile = new File(oldFile);
+        File newfile = new File(newFile);
+        oldfile.renameTo(newfile);
     }
 
     OnClickListener startListener = new OnClickListener() {
@@ -143,6 +160,23 @@ public class ParcoursActivity extends AppCompatActivity {
             time = time/1000;
             String tempsText = time/3600 + ":" + (int)((time%3600)/60) + ":" + (int)((time%3600)%60);
             chrono.stop();
+            Bitmap bmap=((BitmapDrawable)parcours.getDrawable()).getBitmap();
+            ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
+            File file = wrapper.getDir("Images",MODE_PRIVATE);
+            renameFile("/data/data/com.tc.mypath/app_Images/ParcoursHistorique2.jpg","/data/data/com.tc.mypath/app_Images/ParcoursHistorique3.jpg");
+            renameFile("/data/data/com.tc.mypath/app_Images/ParcoursHistorique1.jpg","/data/data/com.tc.mypath/app_Images/ParcoursHistorique2.jpg");
+            file = new File(file, "ParcoursHistorique1"+".jpg");
+            try{
+                OutputStream stream= null;
+                stream = new FileOutputStream(file);
+                bmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+                stream.flush();
+
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
+
             Intent myIntent = new Intent(v.getContext(), FeedbackActivity.class);
             myIntent.putExtra("time", tempsText);
             myIntent.putExtra("distance", distance);

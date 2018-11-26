@@ -29,6 +29,7 @@ public class PagePrincipale extends AppCompatActivity {
     private Button generer;
     private Button parametres;
     private Button deconnexion;
+    private Button historique;
     private TextView nom;
     int erreur = 0;
 
@@ -40,11 +41,14 @@ public class PagePrincipale extends AppCompatActivity {
         generer = (Button) findViewById(R.id.generer);
         parametres = (Button) findViewById(R.id.parametres);
         deconnexion = (Button) findViewById(R.id.deconnexion);
+        historique = (Button) findViewById(R.id.historique);
+
         nom = (TextView) findViewById(R.id.nom);
 
         generer.setOnClickListener(genererListener);
         parametres.setOnClickListener(parametresListener);
         deconnexion.setOnClickListener(deconnexionListener);
+        historique.setOnClickListener(historiqueListener);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -60,7 +64,7 @@ public class PagePrincipale extends AppCompatActivity {
             String personId = acct.getId();
             Uri personPhoto = acct.getPhotoUrl();
 
-            nom.setText("Bonjour "+ personGivenName);
+            nom.setText("Bonjour "+ acct.getGivenName());
         }
 
     }
@@ -128,6 +132,14 @@ public class PagePrincipale extends AppCompatActivity {
                     }
                 });
     }
+
+    OnClickListener historiqueListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent myIntent = new Intent(context, HistoriqueActivity.class);
+            startActivityForResult(myIntent, 0);
+        }
+    };
 
 
 }
