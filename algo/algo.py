@@ -1,5 +1,7 @@
 import requests as req
 import json
+import time
+import math
 
 STARTPOS = (45.7837389,4.8725722)
 RADIUS = 0.0001
@@ -20,12 +22,14 @@ def onWay(noeud):
 
     # Vérification que le noeud est sur un chemin
     if(data['elements']!=[]):
-        print()
-        print("---------ONWAY---------")
+        # print()
+        # print("Noeud : "+ str(noeud))
+        # print("---------ONWAY---------")
         return True
     else :
-        print()
-        print("---------NOT ONWAY------------")
+        # print()
+        # print("Noeud : "+ str(noeud))
+        # print("---------NOT ONWAY------------")
         return False
 
 ################################################################################
@@ -44,19 +48,21 @@ def onLoopWay(noeud):
     # Sauvegarde des chemins
     ways = data['elements']
 
+    # print()
+    # print("Noeud : "+ str(noeud))
     # Liste des neuds vide
     nodes = []
     # Parcours des chemins
     for way in ways:
         # Faire attention a ne pas tomber dans une boucle infinie
-        print(way['nodes'][0])
-        print(way['nodes'][len(way['nodes'])-1])
+        # print(way['nodes'][0])
+        # print(way['nodes'][len(way['nodes'])-1])
         if(way['nodes'][0]!=way['nodes'][len(way['nodes'])-1]):
             # Ajout des extrémités à la liste des noeuds
-            print()
-            print("--------NOT LOOP----------")
+            # print("--------NOT LOOP----------")
             return False
 
+    # print("--------LOOP WAY----------")
     return True
 
 ################################################################################
@@ -78,13 +84,14 @@ def startingNode(startPos, radius):
     # Sauvegarde des noeuds
     nodes = data['elements']
     print("Radius : "+ str(radius))
-    print("Toutes les nodes")
-    print(nodes)
+    # print()
+    # print(nodes)
 
     # Recherche d'un bon noeud de départ
     for node in nodes:
-        print("Node en cours : ")
-        print(node)
+        # print()
+        # print("Node en cours : ")
+        # print(node)
         if(onWay(node)==True and onLoopWay(node)==False):
             return node
 
@@ -94,47 +101,6 @@ def startingNode(startPos, radius):
     return node
 
 ################################################################################
-############################ Start sur un chemin ###############################
-################################################################################
-
-def wayify(noeud):
-    # Création da la requète récupérant le chemin du noeud
-    query1 = "node("+ str(noeud['id']) +");way(bn);out body;"
-    url1 = URLAPI + query1
-
-    # Appel à l'API
-    content1 = req.get(url1)
-    data1 = content1.json()
-
-    # Vérification que le noeud n'est pas sur un chemin
-    if(data1['elements']==[]):
-        # Le noeud n'est pas sur un chemin
-        # Création da la requète récupérant les chemin à moins de 200m du noeud
-        query2 = "node("+ str(noeud['id']) +");way(around:100);out body;"
-        url2 = URLAPI + query2
-
-        # Appel à l'API
-        content2 = req.get(url2)
-        data2 = content2.json()
-
-        # Nouveau noeud (la première du chemin)
-        newNode = data2['elements'][0]['nodes'][0]
-
-        # Création da la requète récupérant les information du noeud
-        query3 = "node("+ str(newNode) +");out body;"
-        url3 = URLAPI + query3
-
-        # Appel à l'API
-        content3 = req.get(url3)
-        data3 = content2.json()
-
-        return data3['elements']
-
-    else :
-        # Le noeud est déjà sur un chemin
-        return noeud
-
-################################################################################
 ###################### Récupération des noeuds suivants ########################
 ################################################################################
 
@@ -142,7 +108,6 @@ def getNextNodes(noeud):
     # Création de la requète récupérant les noeud au bout des chemins
     query = "node("+ str(noeud['id']) +");way(bn);out body;"
     url = URLAPI + query
-    print(url)
 
     # Appel à l'api
     content = req.get(url)
@@ -161,21 +126,7 @@ def getNextNodes(noeud):
             nodes.append(way['nodes'][0])
             nodes.append(way['nodes'][len(way['nodes'])-1])
 
-
-
-    newNode = noeud
-    # Si aucun noeuds suivant n'a été trouvé
-    if(nodes==[]):
-        # On trouve un autre noeud proche sur un chemin
-        newNode = getCloseNodeOnWay(noeud)
-        print("ECHEC NOUVELLE BOUCLE, NOUVELLE NODE :")
-        print(newNode)
-        # On relance cette fonction avec le nouveau noeud
-        nodes = getNextNodes(newNode)
-
-    #On retourne les nodes qui viennent après newNode
-    print(nodes)
-    return nodes, newNode
+    return nodes
 
 ################################################################################
 ###################### Récupération des info d'un noeud ########################
@@ -193,38 +144,73 @@ def getNodeInfo(noeudId):
     return data['elements'][0]
 
 ################################################################################
-############## Récupération d'un noeud proche sur un chemin ####################
+#################### Calcul de la distance entre 2 noeuds ######################
 ################################################################################
 
-def getCloseNodeOnWay(noeud):
-    # Création de la requête récupérant le noeud
-    query = "node("+ str(noeud['id']) +");node(around:20);out body;"
-    url = URLAPI + query
+def distanceBetween(noeud1, noeud2):
+    lat1 = noeud1['lat']
+    lat2 = noeud2['lat']
+    lon1 = noeud1['lon']
+    lon2 = noeud2['lon']
 
-    # Appel à l'API
-    content = req.get(url)
-    data = content.json()
+    distance = 1852*60*math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))
+    return distance
 
-    newNode = data['elements'][1]
+################################################################################
+#################### Mise à jour des tableau d'exploration #####################
+################################################################################
 
-    newNode = wayify(newNode)
+def updateExploration(notExplored, explored):
+    # Récupération du noeud à explorer
+    exploreNode = notExplored.pop(0)
+    # Récupération des noeuds suivant
+    nextNodes = getNextNodes(exploreNode)
 
-    return newNode
+    # Parcours des noeuds suivant
+    for noeud in nextNodes:
+        if(noeud!=exploreNode['id']):
+            # Récupération de toutes les infos du noeud
+            node = getNodeInfo(noeud)
+            # Récupération de la distance entre le noeud exploré et ce noeud
+            distance = distanceBetween(exploreNode, node)
+            # Ajout de la distance de noeud depuis le départ
+            node['distance'] = exploreNode['distance'] + distance
+            # Ajout de l'index du noeud parent
+            node['parentIndex'] = len(explored)
+            # Ajout du noeud à la liste des noeuds à explorer
+            notExplored = notExplored + [node]
+
+    # Tri des noeuds par ordre croissant de distance
+    notExplored = sorted(notExplored, key = lambda node: node['distance'])
+    # Ajout du noeud exploré à la liste des noeuds déjà explorés
+    explored = explored + [exploreNode]
+
+    # Renvoie des deux tableaux mis à jour
+    return notExplored, explored
 
 ################################################################################
 ################################## Tests #######################################
 ################################################################################
+
+# Récupération du noeud de départ
 startnode = startingNode(STARTPOS, RADIUS)
-print("Start node initiale : ")
+startnode['distance'] = 0
+startnode['parentIndex'] = None
+print("Start node : ")
 print(startnode)
-print()
 
-nextNodes = []
-nextNodes = nextNodes + getNextNodes(startnode)[0]
-print("Nodes suivantes : ")
-print(nextNodes)
+# Initialisation du tableau des noeuds à explorer
+nodeToExplore = [startnode]
+# Initialisation du tableau des noeuds explorés
+nodeExplored = []
 
-
-nextNode = getNodeInfo(nextNodes.pop(1))
-nextNodes = nextNodes + getNextNodes(nextNode)[0]
-print(nextNodes)
+nodeToExplore, nodeExplored = updateExploration(nodeToExplore, nodeExplored)
+print("Noeuds à explorer : ")
+print(nodeToExplore)
+print("Noeuds explorés :")
+print(nodeExplored)
+nodeToExplore, nodeExplored = updateExploration(nodeToExplore, nodeExplored)
+print("Noeuds à explorer : ")
+print(nodeToExplore)
+print("Noeuds explorés :")
+print(nodeExplored)
