@@ -23,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".PagePrincipale">
+        <activity android:name=".ConnexionActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,7 +33,7 @@
         <activity android:name=".ParametresActivity" />
         <activity android:name=".ParcoursActivity" />
         <activity android:name=".FeedbackActivity" />
-        <activity android:name=".ConnexionActivity" />
+        <activity android:name=".PagePrincipale" />
         <activity android:name=".HistoriqueActivity"></activity>
     </application>
 
