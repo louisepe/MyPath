@@ -64,7 +64,7 @@ public class PagePrincipale extends AppCompatActivity {
             String personId = acct.getId();
             Uri personPhoto = acct.getPhotoUrl();
 
-            nom.setText("Bonjour "+ acct.getGivenName());
+            //nom.setText("Bonjour "+ acct.getGivenName());
         }
 
     }
