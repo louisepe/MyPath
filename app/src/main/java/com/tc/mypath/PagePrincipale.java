@@ -38,6 +38,9 @@ public class PagePrincipale extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_page_principale);
 
+        Intent myIntent = getIntent();
+        int connecte = myIntent.getIntExtra("connecte",0);
+
         generer = (Button) findViewById(R.id.generer);
         parametres = (Button) findViewById(R.id.parametres);
         deconnexion = (Button) findViewById(R.id.deconnexion);
@@ -65,6 +68,10 @@ public class PagePrincipale extends AppCompatActivity {
             Uri personPhoto = acct.getPhotoUrl();
 
             nom.setText("Bonjour "+ acct.getGivenName());
+        }
+
+        if(connecte==0){
+            deconnexion.setText("Connexion");
         }
 
     }

@@ -1,9 +1,12 @@
 package com.tc.mypath;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -15,6 +18,8 @@ public class ConnexionActivity extends AppCompatActivity {
 
       private GoogleSignInClient mGoogleSignInClient;
       private static int RC_SIGN_IN = 100;
+      private Button noConnexion;
+
 
       @Override
       protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +29,10 @@ public class ConnexionActivity extends AppCompatActivity {
           GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
           .requestEmail()
           .build();
+
+          noConnexion = (Button) findViewById(R.id.noconnexion);
+
+          noConnexion.setOnClickListener(noConnexionListener);
 
           mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
@@ -68,11 +77,19 @@ public class ConnexionActivity extends AppCompatActivity {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Intent myIntent = new Intent(this, PagePrincipale.class);
+            myIntent.putExtra("connecte", 1);
             startActivityForResult(myIntent, 0);
         } catch (ApiException e) {
 
         }
     }
 
-
+    View.OnClickListener noConnexionListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent myIntent = new Intent(v.getContext(), PagePrincipale.class);
+            myIntent.putExtra("connecte", 0);
+            startActivityForResult(myIntent,0);
+        }
+    };
 }
