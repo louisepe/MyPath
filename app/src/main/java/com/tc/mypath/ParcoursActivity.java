@@ -12,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -28,9 +29,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.osmdroid.api.IMapController;
+import org.osmdroid.bonuspack.routing.OSRMRoadManager;
+import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.bonuspack.routing.RoadManager;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -38,6 +44,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 public class ParcoursActivity extends AppCompatActivity {
 
@@ -65,6 +72,9 @@ public class ParcoursActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parcours);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         dislike = (Button) findViewById(R.id.dislike);
         start = (Button) findViewById(R.id.start);
@@ -111,6 +121,20 @@ public class ParcoursActivity extends AppCompatActivity {
                 startActivity(i);
             }
         };
+
+        //ICI ON TRACE LA ROUTE
+        GeoPoint startPoint = new GeoPoint(37.4227933, -122.085872);
+        RoadManager roadManager = new OSRMRoadManager(this);
+        ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
+        waypoints.add(startPoint);
+        GeoPoint endPoint = new GeoPoint(37.78997, -122.40087199999999);
+        waypoints.add(endPoint);
+
+        Road road = roadManager.getRoad(waypoints);
+        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+        mapView.getOverlays().add(roadOverlay);
+        mapView.invalidate();
+
 
         //FIN LOCALISATION
         start.setOnClickListener(startListener);

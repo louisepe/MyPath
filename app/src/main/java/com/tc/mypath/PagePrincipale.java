@@ -73,6 +73,9 @@ public class PagePrincipale extends AppCompatActivity {
         if(connecte==0){
             deconnexion.setText("Connexion");
         }
+        else{
+            deconnexion.setText("Déconnexion");
+        }
 
     }
 
