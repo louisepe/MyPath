@@ -153,7 +153,18 @@ def distanceBetween(noeud1, noeud2):
     lon1 = noeud1['lon']
     lon2 = noeud2['lon']
 
-    distance = 1852*60*math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))
+    sin1 = math.sin(math.radians(lat1))
+    sin2 = math.sin(math.radians(lat2))
+    cos1 = math.cos(math.radians(lat1))
+    cos2 = math.cos(math.radians(lat2))
+    cos3 = math.cos(math.radians(lon2-lon1))
+
+    # A cause des problème d'arrondi on a parfois un distance de 0
+    if(((sin1*sin2) + (cos1*cos2*cos3))>1):
+        # == distance = 0
+        distance = 6367445*math.acos(1)
+    else:
+        distance = 6367445*math.acos((sin1*sin2) + (cos1*cos2*cos3))
     return distance
 
 ################################################################################
@@ -168,35 +179,28 @@ def updateExploration(notExplored, explored):
 
     # Parcours des noeuds suivant
     for noeud in nextNodes:
-        if(noeud!=exploreNode['id']):
-            if(len(explored)>0):
-                if(noeud!=explored[exploreNode['parentIndex']]['id']):
+        # Récupération de toutes les infos du noeud
+        node = getNodeInfo(noeud)
+        # Récupération de la distance entre le noeud exploré et ce noeud
+        distance = distanceBetween(exploreNode, node)
+        # Ajout de la distance de noeud depuis le départ
+        node['distance'] = exploreNode['distance'] + distance
+        # Ajout de l'index du noeud parent
+        node['parentIndex'] = len(explored)
+        # Ajout des noeuds frère
+        node['noeudsFrere'] = nextNodes
+        # Ajout des nodes interdites
+        node['noeudsdInterdits'] = [exploreNode['id']]+node['noeudsFrere']
 
-                    # Récupération de toutes les infos du noeud
-                    node = getNodeInfo(noeud)
-                    # Récupération de la distance entre le noeud exploré et ce noeud
-                    distance = distanceBetween(exploreNode, node)
-                    # Ajout de la distance de noeud depuis le départ
-                    node['distance'] = exploreNode['distance'] + distance
-                    # Ajout de l'index du noeud parent
-                    node['parentIndex'] = len(explored)
-                    if(len(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, notExplored)))>0):
-                        if(abs(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, notExplored))[0]['distance']-node['distance'])>20):
-                            # Ajout du noeud à la liste des noeuds à explorer
-                            notExplored = notExplored + [node]
-                    else:
-                        # Ajout du noeud à la liste des noeuds à explorer
-                        notExplored = notExplored + [node]
-            else:
-                # Récupération de toutes les infos du noeud
-                node = getNodeInfo(noeud)
-                # Récupération de la distance entre le noeud exploré et ce noeud
-                distance = distanceBetween(exploreNode, node)
-                # Ajout de la distance de noeud depuis le départ
-                node['distance'] = exploreNode['distance'] + distance
-                # Ajout de l'index du noeud parent
-                node['parentIndex'] = len(explored)
-                # Ajout du noeud à la liste des noeuds à explorer
+        # Si le noeud ne fait pas partie des noeuds interdit d'exploration
+        if((noeud in exploreNode['noeudsdInterdits'])==False):
+            # Si le noeud n'est pas un noeud par lequel on est déjà passé il y a moin de 100m
+            if(len(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, notExplored)))>0):
+                if(abs(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, notExplored))[0]['distance']-node['distance'])>100):
+                    # Ajout du noeud à la liste des noeuds a exploré
+                    notExplored = notExplored + [node]
+            else :
+                # Ajout du noeud à la liste des noeuds a exploré
                 notExplored = notExplored + [node]
 
     # Tri des noeuds par ordre croissant de distance
@@ -215,6 +219,8 @@ def updateExploration(notExplored, explored):
 startnode = startingNode(STARTPOS, RADIUS)
 startnode['distance'] = 0
 startnode['parentIndex'] = None
+startnode['noeudsFrere'] = []
+startnode['noeudsdInterdits'] = []
 print("Start node : ")
 print(startnode)
 
@@ -236,3 +242,9 @@ while nodeToExplore[0]['distance']<1000 :
     print(nodeToExplore)
     print("Noeuds explorés :")
     print(nodeExplored)
+#     if(nodeToExplore[0]['distance']>i*100):
+#         print(str(i*100)+" m")
+#         i+=1
+#
+# print("Noeuds explorés :")
+# print(nodeExplored)
