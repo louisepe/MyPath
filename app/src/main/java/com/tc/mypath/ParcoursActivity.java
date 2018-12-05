@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -12,10 +13,12 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -84,6 +87,7 @@ public class ParcoursActivity extends AppCompatActivity {
         chrono = (Chronometer) findViewById(R.id.chrono);
 
         //Localisation
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
 
@@ -98,10 +102,26 @@ public class ParcoursActivity extends AppCompatActivity {
         myLocationOverlay.enableFollowLocation();
         final TextView textView = (TextView) findViewById(R.id.text);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //ICI ON TRACE LA ROUTE
+        //GeoPoint startPoint = new GeoPoint(37.4227933, -122.085872);
+        final RoadManager roadManager = new OSRMRoadManager(this);
+        final ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
+        //waypoints.add(startPoint);
+        //GeoPoint endPoint = new GeoPoint(37.78997, -122.40087199999999);
+        //waypoints.add(endPoint);
+
+
+
+
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                //textView.append("n " + location.getLongitude() + " " + location.getLatitude());
+                GeoPoint endPoint = new GeoPoint(location);
+                waypoints.add(endPoint);
+                Road road = roadManager.getRoad(waypoints);
+                Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+                mapView.getOverlays().add(roadOverlay);
+                mapView.invalidate();
             }
 
             @Override
@@ -121,20 +141,6 @@ public class ParcoursActivity extends AppCompatActivity {
                 startActivity(i);
             }
         };
-
-        //ICI ON TRACE LA ROUTE
-        GeoPoint startPoint = new GeoPoint(37.4227933, -122.085872);
-        RoadManager roadManager = new OSRMRoadManager(this);
-        ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
-        waypoints.add(startPoint);
-        GeoPoint endPoint = new GeoPoint(37.78997, -122.40087199999999);
-        waypoints.add(endPoint);
-
-        Road road = roadManager.getRoad(waypoints);
-        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
-        mapView.getOverlays().add(roadOverlay);
-        mapView.invalidate();
-
 
         //FIN LOCALISATION
         start.setOnClickListener(startListener);
@@ -177,6 +183,13 @@ public class ParcoursActivity extends AppCompatActivity {
     OnClickListener startListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
+            //TODO Faire une VRAIE vérification de permissions parce-que la mdr
+            if ( Build.VERSION.SDK_INT >= 30 &&
+                    ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return  ;
+            }
+            locationManager.requestLocationUpdates("gps",5000,0,listener);
             start.setVisibility(View.GONE);
             dislike.setVisibility(View.GONE);
             stop.setVisibility(View.GONE);
