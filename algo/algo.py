@@ -6,6 +6,7 @@ import math
 STARTPOS = (45.7837389,4.8725722)
 RADIUS = 0.0001
 URLAPI ="http://overpass-api.de/api/interpreter?data=[out:json];"
+DISTANCE = 500
 
 ################################################################################
 ############################ Sur un chemin #####################################
@@ -236,14 +237,19 @@ def updateExplorationBFS2(notExplored, explored):
         # Ajout des nodes interdites
         node['noeudsdInterdits'] = []
 
+        endNode={}
+        if(noeud==realStart['id']):
+            endNode=node
         # Si le noeud ne fait pas partie des noeuds interdit d'exploration
-        if(len(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, notExplored)))==0 and len(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, explored)))==0 and noeud!=exploreNode['id'] ):
+        elif(len(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, notExplored)))==0 and len(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, explored)))==0 and noeud!=exploreNode['id'] ):
             notExplored = notExplored + [node]
 
     # Tri des noeuds par ordre croissant de distance
     notExplored = sorted(notExplored, key = lambda node: node['distance'])
     # Ajout du noeud exploré à la liste des noeuds déjà explorés
     explored = explored + [exploreNode]
+    if(endNode!={}):
+        explored = explored + [endNode]
 
     # Renvoie des deux tableaux mis à jour
     return notExplored, explored
@@ -265,14 +271,16 @@ print(startnode)
 nodeToExplore = [startnode]
 # Initialisation du tableau des noeuds explorés
 nodeExplored = []
-#
+startsnode, nodeExplored = updateExplorationBFS(nodeToExplore, nodeExplored)
+nodeToExplore = [startsnode[0]]
+realStart = startsnode[0]
 # nodeToExplore, nodeExplored = updateExploration(nodeToExplore, nodeExplored)
 # print("Noeuds à explorer : ")
 # print(nodeToExplore)
 # print("Noeuds explorés :")
 # print(nodeExplored)
 i=1
-while nodeToExplore[0]['distance']<1000 :
+while nodeToExplore[0]['distance']<DISTANCE :
     print()
     nodeToExplore, nodeExplored = updateExplorationBFS2(nodeToExplore, nodeExplored)
     print("Noeuds à explorer : ")
@@ -285,3 +293,5 @@ while nodeToExplore[0]['distance']<1000 :
 #
 # print("Noeuds explorés :")
 # print(nodeExplored)
+print(list(filter(lambda alreadyNode: alreadyNode['id']==nodeExplored[0]['id'], nodeExplored)))
+print(list(filter(lambda alreadyNode: alreadyNode['id']==3252041060, nodeExplored)))
