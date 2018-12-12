@@ -51,7 +51,7 @@ distance=10000
 divisions=int(distance/200)
 parcour=0
 length=0
-
+route=[]
 #testlocation_id=5204021270
 #testLocation_coord = (33.2989041, -111.833341)
 #origintest={'y':33.2989041 , 'x': -111.833341 , 'osmid':5204021270}
@@ -84,6 +84,7 @@ for x in range(1,divisions+1):
 	distancenoeuds = 6367445*math.acos((sin1*sin2) + (cos1*cos2*cos3))
 	#route of the shortest path
 	route2 = nx.shortest_path(G2, origintest2, destination_node)
+	route= route + route2
 	#compilation of all the nodes collected 
 	route.append(route2)
 	#calculation of the total distance
