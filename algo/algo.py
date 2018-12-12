@@ -168,10 +168,10 @@ def distanceBetween(noeud1, noeud2):
     return distance
 
 ################################################################################
-#################### Mise à jour des tableau d'exploration #####################
+################## Mise à jour des tableau d'exploration BFS ###################
 ################################################################################
 
-def updateExploration(notExplored, explored):
+def updateExplorationBFS(notExplored, explored):
     # Récupération du noeud à explorer
     exploreNode = notExplored.pop(0)
     # Récupération des noeuds suivant
@@ -212,6 +212,43 @@ def updateExploration(notExplored, explored):
     return notExplored, explored
 
 ################################################################################
+################# Mise à jour des tableau d'exploration BFS2 ###################
+################################################################################
+
+def updateExplorationBFS2(notExplored, explored):
+    # Récupération du noeud à explorer
+    exploreNode = notExplored.pop(0)
+    # Récupération des noeuds suivant
+    nextNodes = getNextNodes(exploreNode)
+
+    # Parcours des noeuds suivant
+    for noeud in nextNodes:
+        # Récupération de toutes les infos du noeud
+        node = getNodeInfo(noeud)
+        # Récupération de la distance entre le noeud exploré et ce noeud
+        distance = distanceBetween(exploreNode, node)
+        # Ajout de la distance de noeud depuis le départ
+        node['distance'] = exploreNode['distance'] + distance
+        # Ajout de l'index du noeud parent
+        node['parentIndex'] = len(explored)
+        # Ajout des noeuds frère
+        node['noeudsFrere'] = nextNodes
+        # Ajout des nodes interdites
+        node['noeudsdInterdits'] = []
+
+        # Si le noeud ne fait pas partie des noeuds interdit d'exploration
+        if(len(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, notExplored)))==0 and len(list(filter(lambda alreadyNode: alreadyNode['id']==noeud, explored)))==0 and noeud!=exploreNode['id'] ):
+            notExplored = notExplored + [node]
+
+    # Tri des noeuds par ordre croissant de distance
+    notExplored = sorted(notExplored, key = lambda node: node['distance'])
+    # Ajout du noeud exploré à la liste des noeuds déjà explorés
+    explored = explored + [exploreNode]
+
+    # Renvoie des deux tableaux mis à jour
+    return notExplored, explored
+
+################################################################################
 ################################## Tests #######################################
 ################################################################################
 
@@ -237,7 +274,7 @@ nodeExplored = []
 i=1
 while nodeToExplore[0]['distance']<1000 :
     print()
-    nodeToExplore, nodeExplored = updateExploration(nodeToExplore, nodeExplored)
+    nodeToExplore, nodeExplored = updateExplorationBFS2(nodeToExplore, nodeExplored)
     print("Noeuds à explorer : ")
     print(nodeToExplore)
     print("Noeuds explorés :")
