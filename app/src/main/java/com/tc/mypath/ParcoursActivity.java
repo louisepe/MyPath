@@ -56,6 +56,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class ParcoursActivity extends AppCompatActivity {
 
     final Context context = this;
@@ -71,13 +75,15 @@ public class ParcoursActivity extends AppCompatActivity {
     private long time = 0;
     double distance;
     private MapView mapView;
-    IMapController MapController = null;
+    final IMapController MapController = null;
     private LocationManager locationManager;
     private LocationListener listener;
     //private Button button;
     MyLocationNewOverlay myLocationOverlay;
     private Context contextMap;
     private TextView mTextView;
+    private double latitude;
+    private double longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +109,7 @@ public class ParcoursActivity extends AppCompatActivity {
 
         mapView.setBuiltInZoomControls(true);
         mapView.setMultiTouchControls(true);
-        IMapController mapController = mapView.getController();
+        final IMapController mapController = mapView.getController();
         mapController.setZoom(18.5);
         contextMap=getApplicationContext();
         this.myLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(contextMap),mapView);
@@ -120,7 +126,6 @@ public class ParcoursActivity extends AppCompatActivity {
         //GeoPoint endPoint = new GeoPoint(37.78997, -122.40087199999999);
         //waypoints.add(endPoint);
 
-        getPoint();
 
 
         listener = new LocationListener() {
@@ -134,6 +139,12 @@ public class ParcoursActivity extends AppCompatActivity {
                 Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
                 mapView.getOverlays().add(roadOverlay);
                 mapView.invalidate();*/
+
+                //POUR CENTRER LA CARTE SUR LES COORDONNEES ENVOYEES PAR L'API (Ca sert a rien mais ca parmet de montrer que ca marche de recup les coordonnees)
+                getPoint();
+                GeoPoint centerPoint = new GeoPoint(latitude,longitude);
+                mapController.setCenter(centerPoint);
+                mapController.animateTo(centerPoint);
             }
 
             @Override
@@ -314,7 +325,9 @@ public class ParcoursActivity extends AppCompatActivity {
     public void getPoint(){
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://10.0.2.2:5000";
+        String url ="http://10.0.2.2:5000/coord";
+
+
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -322,8 +335,20 @@ public class ParcoursActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         // Display the first 500 characters of the response string.
-                        mTextView.setText("Response is: "+ response);
                         //mTextView.setText("That worked");
+                        try{
+                            JSONObject coord = new JSONObject(response);
+                            latitude = coord.getDouble("latitude");
+                            longitude = coord.getDouble("longitude");
+                            /**String sLat = Double.toString(latitude);
+                            String sLong = Double.toString(longitude);
+                            mTextView.setText("Response is: "+ latitude + " " +longitude);*/
+
+                        }
+                        catch (final JSONException e){
+
+                        }
+
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -335,4 +360,5 @@ public class ParcoursActivity extends AppCompatActivity {
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
+
 }
