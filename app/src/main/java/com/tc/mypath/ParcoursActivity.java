@@ -31,6 +31,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.osmdroid.api.IMapController;
 import org.osmdroid.bonuspack.routing.OSRMRoadManager;
 import org.osmdroid.bonuspack.routing.Road;
@@ -70,6 +77,7 @@ public class ParcoursActivity extends AppCompatActivity {
     //private Button button;
     MyLocationNewOverlay myLocationOverlay;
     private Context contextMap;
+    private TextView mTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +93,8 @@ public class ParcoursActivity extends AppCompatActivity {
         stop = (Button) findViewById(R.id.stop);
 
         chrono = (Chronometer) findViewById(R.id.chrono);
+
+        mTextView = (TextView) findViewById(R.id.test);
 
         //Localisation
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -110,18 +120,20 @@ public class ParcoursActivity extends AppCompatActivity {
         //GeoPoint endPoint = new GeoPoint(37.78997, -122.40087199999999);
         //waypoints.add(endPoint);
 
-
+        getPoint();
 
 
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                //CE MORCEAU DE CODE PERMET DE TRACER LE CHEMIN AU FUR ET A MESURE
+                /**
                 GeoPoint endPoint = new GeoPoint(location);
                 waypoints.add(endPoint);
                 Road road = roadManager.getRoad(waypoints);
                 Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
                 mapView.getOverlays().add(roadOverlay);
-                mapView.invalidate();
+                mapView.invalidate();*/
             }
 
             @Override
@@ -297,5 +309,30 @@ public class ParcoursActivity extends AppCompatActivity {
         Configuration.getInstance().save(getApplicationContext(), PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         if (mapView!=null)
             mapView.onPause();
+    }
+
+    public void getPoint(){
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url ="http://10.0.2.2:5000";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        mTextView.setText("Response is: "+ response);
+                        //mTextView.setText("That worked");
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                mTextView.setText("That didn't work!");
+            }
+        });
+
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
     }
 }

@@ -36,5 +36,6 @@ dependencies {
     implementation 'org.osmdroid:osmdroid-mapsforge:6.0.2'
     implementation 'org.osmdroid:osmdroid-geopackage:6.0.2'
     implementation 'com.github.MKergall:osmbonuspack:6.5.2'
+    implementation 'com.android.volley:volley:1.1.0'
 
 }
