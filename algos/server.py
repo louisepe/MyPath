@@ -6,6 +6,7 @@ from flask import render_template
 from flask import request
 import os
 import json
+from intersections import getParcours
 
 app = Flask(__name__)
 
@@ -19,7 +20,16 @@ def getCoord():
     if request.method == 'GET':
         return json.dumps({'latitude':45.75, 'longitude':4.85})
 
-   
+@app.route('/infosUser', methods=['POST'])
+def getInfos():
+    if request.method == 'POST':
+            data = request.json
+            print(data)
+            getParcours(data["distance"], data["latitude"], data["longitude"])
+            return "ok"
+        
+        
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='localhost', debug=True, port=port)

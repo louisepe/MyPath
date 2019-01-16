@@ -21,6 +21,7 @@ import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -31,10 +32,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -50,15 +55,25 @@ import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static com.android.volley.Request.Method.POST;
 
 public class ParcoursActivity extends AppCompatActivity {
 
@@ -84,11 +99,15 @@ public class ParcoursActivity extends AppCompatActivity {
     private TextView mTextView;
     private double latitude;
     private double longitude;
+    private int relaunch = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parcours);
+
+        Intent myIntent = getIntent();
+        distance = myIntent.getDoubleExtra("distance", 0.00);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -132,19 +151,26 @@ public class ParcoursActivity extends AppCompatActivity {
             @Override
             public void onLocationChanged(Location location) {
                 //CE MORCEAU DE CODE PERMET DE TRACER LE CHEMIN AU FUR ET A MESURE
-                /**
-                GeoPoint endPoint = new GeoPoint(location);
+
+                /**GeoPoint endPoint = new GeoPoint(location);
                 waypoints.add(endPoint);
                 Road road = roadManager.getRoad(waypoints);
                 Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
                 mapView.getOverlays().add(roadOverlay);
-                mapView.invalidate();*/
+                mapView.invalidate();**/
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
 
                 //POUR CENTRER LA CARTE SUR LES COORDONNEES ENVOYEES PAR L'API (Ca sert a rien mais ca parmet de montrer que ca marche de recup les coordonnees)
-                getPoint();
+                /**getPoint();
                 GeoPoint centerPoint = new GeoPoint(latitude,longitude);
                 mapController.setCenter(centerPoint);
-                mapController.animateTo(centerPoint);
+                mapController.animateTo(centerPoint);*/
+                if (relaunch == 1 && longitude!=0){
+                    sendInfos(distance*1000, longitude, latitude);
+                    relaunch = 0;
+                }
+
             }
 
             @Override
@@ -170,9 +196,6 @@ public class ParcoursActivity extends AppCompatActivity {
         pause.setOnClickListener(pauseListener);
         dislike.setOnClickListener(dislikeListener);
         stop.setOnClickListener(stopListener);
-
-        Intent myIntent = getIntent();
-        distance = myIntent.getDoubleExtra("distance", 0.00);
 
         parcoursLayout = findViewById(R.id.parcoursLayout);
         boutonsLayout = findViewById(R.id.boutonsLayout);
@@ -326,28 +349,12 @@ public class ParcoursActivity extends AppCompatActivity {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
         String url ="http://10.0.2.2:5000/coord";
-
-
-
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        //mTextView.setText("That worked");
-                        try{
-                            JSONObject coord = new JSONObject(response);
-                            latitude = coord.getDouble("latitude");
-                            longitude = coord.getDouble("longitude");
-                            /**String sLat = Double.toString(latitude);
-                            String sLong = Double.toString(longitude);
-                            mTextView.setText("Response is: "+ latitude + " " +longitude);*/
-
-                        }
-                        catch (final JSONException e){
-
-                        }
+                        Log.d("Response", response);
 
                     }
                 }, new Response.ErrorListener() {
@@ -357,8 +364,64 @@ public class ParcoursActivity extends AppCompatActivity {
             }
         });
 
+
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
+    }
+
+    public void sendInfos(Double distance, double longitude, double latitude){
+        // Instantiate the RequestQueue.
+        String url ="http://10.0.2.2:5000/infosUser";
+        try {
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("latitude", longitude);
+            jsonBody.put("longitude", latitude);
+            jsonBody.put("distance",distance);
+            final String mRequestBody = jsonBody.toString();
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Log.i("LOG_RESPONSE", response);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("LOG_RESPONSE", error.toString());
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return mRequestBody == null ? null : mRequestBody.getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", mRequestBody, "utf-8");
+                        return null;
+                    }
+                }
+
+                @Override
+                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                    String responseString = "";
+                    if (response != null) {
+                        responseString = String.valueOf(response.statusCode);
+                    }
+                    return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+                }
+            };
+
+            requestQueue.add(stringRequest);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 }
