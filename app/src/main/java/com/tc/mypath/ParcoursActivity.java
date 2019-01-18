@@ -33,6 +33,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -93,6 +94,7 @@ public class ParcoursActivity extends AppCompatActivity {
     final IMapController MapController = null;
     private LocationManager locationManager;
     private LocationListener listener;
+    RoadManager roadManager;
     //private Button button;
     MyLocationNewOverlay myLocationOverlay;
     private Context contextMap;
@@ -123,6 +125,7 @@ public class ParcoursActivity extends AppCompatActivity {
 
         //Localisation
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
 
@@ -139,8 +142,8 @@ public class ParcoursActivity extends AppCompatActivity {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         //ICI ON TRACE LA ROUTE
         //GeoPoint startPoint = new GeoPoint(37.4227933, -122.085872);
-        final RoadManager roadManager = new OSRMRoadManager(this);
-        final ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
+        roadManager = new OSRMRoadManager(this);
+        //final ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
         //waypoints.add(startPoint);
         //GeoPoint endPoint = new GeoPoint(37.78997, -122.40087199999999);
         //waypoints.add(endPoint);
@@ -190,6 +193,13 @@ public class ParcoursActivity extends AppCompatActivity {
                 startActivity(i);
             }
         };
+        //TODO Faire une VRAIE vérification de permissions parce-que la mdr
+        if ( Build.VERSION.SDK_INT >= 30 &&
+                ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return  ;
+        }
+        locationManager.requestLocationUpdates("gps",5000,0,listener);
 
         //FIN LOCALISATION
         start.setOnClickListener(startListener);
@@ -202,21 +212,6 @@ public class ParcoursActivity extends AppCompatActivity {
 
         parcours = (ImageView) findViewById(R.id.imageParcours);
 
-        if(distance < 7){
-            parcours.setImageResource(R.drawable.parcours5_1km);
-        }
-        else if(distance >= 7 && distance < 10){
-            parcours.setImageResource(R.drawable.parcours9_0km);
-        }
-        else if(distance >= 10 && distance < 12.5){
-            parcours.setImageResource(R.drawable.parcours11_3km);
-        }
-        else if(distance >= 12.5 && distance < 15.5){
-            parcours.setImageResource(R.drawable.parcours14_3km);
-        }
-        else{
-            parcours.setImageResource(R.drawable.parcours17_3km);
-        }
 
     }
 
@@ -229,19 +224,12 @@ public class ParcoursActivity extends AppCompatActivity {
     OnClickListener startListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            //TODO Faire une VRAIE vérification de permissions parce-que la mdr
-            if ( Build.VERSION.SDK_INT >= 30 &&
-                    ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return  ;
-            }
-            locationManager.requestLocationUpdates("gps",5000,0,listener);
+
             start.setVisibility(View.GONE);
             dislike.setVisibility(View.GONE);
             stop.setVisibility(View.GONE);
             pause.setVisibility(View.VISIBLE);
             parcours.setVisibility(View.GONE);
-            mapView.setVisibility(View.VISIBLE);
             chrono.setBase(SystemClock.elapsedRealtime() - time);
             chrono.start();
 
@@ -305,7 +293,7 @@ public class ParcoursActivity extends AppCompatActivity {
             time = time/1000;
             String tempsText = time/3600 + ":" + (int)((time%3600)/60) + ":" + (int)((time%3600)%60);
             chrono.stop();
-            Bitmap bmap=((BitmapDrawable)parcours.getDrawable()).getBitmap();
+            /**Bitmap bmap=((BitmapDrawable)parcours.getDrawable()).getBitmap();
             ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
             File file = wrapper.getDir("Images",MODE_PRIVATE);
             renameFile("/data/data/com.tc.mypath/app_Images/ParcoursHistorique2.jpg","/data/data/com.tc.mypath/app_Images/ParcoursHistorique3.jpg");
@@ -320,7 +308,7 @@ public class ParcoursActivity extends AppCompatActivity {
             }
             catch(IOException e){
                 e.printStackTrace();
-            }
+            }*/
 
             Intent myIntent = new Intent(v.getContext(), FeedbackActivity.class);
             myIntent.putExtra("time", tempsText);
@@ -355,6 +343,7 @@ public class ParcoursActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         Log.d("Response", response);
+                        parseCoord(response);
 
                     }
                 }, new Response.ErrorListener() {
@@ -375,8 +364,8 @@ public class ParcoursActivity extends AppCompatActivity {
         try {
             RequestQueue requestQueue = Volley.newRequestQueue(this);
             JSONObject jsonBody = new JSONObject();
-            jsonBody.put("latitude", longitude);
-            jsonBody.put("longitude", latitude);
+            jsonBody.put("latitude", latitude);
+            jsonBody.put("longitude", longitude);
             jsonBody.put("distance",distance);
             final String mRequestBody = jsonBody.toString();
 
@@ -384,6 +373,7 @@ public class ParcoursActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(String response) {
                     Log.i("LOG_RESPONSE", response);
+                    getPoint();
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -416,12 +406,42 @@ public class ParcoursActivity extends AppCompatActivity {
                 }
             };
 
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    1000000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
             requestQueue.add(stringRequest);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    public void parseCoord(String data){
+        String[] tabCoord = data.split(" ");
+        String[] coord = new String[2];
+        double lat=0;
+        double lon=0;
+
+        final ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
+        for (int i = 0; i<tabCoord.length; i++){
+            tabCoord[i] = tabCoord[i].replace("[","");
+            tabCoord[i] = tabCoord[i].replace("]","");
+            tabCoord[i] = tabCoord[i].replace("\"(","");
+            tabCoord[i] = tabCoord[i].replace(")\",","");
+            tabCoord[i] = tabCoord[i].replace(")\"","");
+            coord = tabCoord[i].split(",");
+            lat = Double.parseDouble(coord[0]);
+            lon = Double.parseDouble(coord[1]);
+            GeoPoint endPoint = new GeoPoint(lat, lon);
+            waypoints.add(endPoint);
+        }
+        Road road = roadManager.getRoad(waypoints);
+        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+        mapView.getOverlays().add(roadOverlay);
+        mapView.invalidate();
     }
 
 }
