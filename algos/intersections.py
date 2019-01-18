@@ -48,7 +48,7 @@ def getParcours(distance, latitude, longitude):
 	print(divisions)
 	testlocation_id=5204021270
 	testLocation_coord = (latitude, longitude)
-	origintest={'y':33.2989041 , 'x': -111.833341 , 'osmid':5204021270}
+	origintest={'y':latitude , 'x': longitude , 'osmid':5204021270}
 	origintest2=list(G2.nodes())[0]
 	lx=[]
 	ly=[]

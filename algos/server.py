@@ -7,6 +7,7 @@ from flask import request
 import os
 import json
 from intersections import getParcours
+from readFile import sendCoord
 
 app = Flask(__name__)
 
@@ -18,16 +19,18 @@ def contact():
 @app.route('/coord', methods=['GET', 'POST'])
 def getCoord():
     if request.method == 'GET':
-        return json.dumps({'latitude':45.75, 'longitude':4.85})
+        return sendCoord("data.txt")
 
 @app.route('/infosUser', methods=['POST'])
 def getInfos():
     if request.method == 'POST':
             data = request.json
             print(data)
-            getParcours(data["distance"], data["latitude"], data["longitude"])
+            latitude = round(data["latitude"],3)
+            longitude = round(data["longitude"],3)
+            print (latitude)
+            getParcours(data["distance"],latitude, longitude )
             return "ok"
-        
         
 
 if __name__ == '__main__':
