@@ -154,10 +154,11 @@ public class ParcoursActivity extends AppCompatActivity {
             @Override
             public void onLocationChanged(Location location) {
                 //CE MORCEAU DE CODE PERMET DE TRACER LE CHEMIN AU FUR ET A MESURE
+                /**final ArrayList<GeoPoint> walkedPoints = new ArrayList<GeoPoint>();
 
-                /**GeoPoint endPoint = new GeoPoint(location);
-                waypoints.add(endPoint);
-                Road road = roadManager.getRoad(waypoints);
+                GeoPoint endPoint = new GeoPoint(location);
+                walkedPoints.add(endPoint);
+                Road road = roadManager.getRoad(walkedPoints);
                 Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
                 mapView.getOverlays().add(roadOverlay);
                 mapView.invalidate();**/
@@ -293,7 +294,10 @@ public class ParcoursActivity extends AppCompatActivity {
             time = time/1000;
             String tempsText = time/3600 + ":" + (int)((time%3600)/60) + ":" + (int)((time%3600)%60);
             chrono.stop();
-            /**Bitmap bmap=((BitmapDrawable)parcours.getDrawable()).getBitmap();
+          
+            Bitmap bmap = mapView.getDrawingCache();
+            mapView.setDrawingCacheEnabled(true);
+            bmap = mapView.getDrawingCache(true);
             ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
             File file = wrapper.getDir("Images",MODE_PRIVATE);
             renameFile("/data/data/com.tc.mypath/app_Images/ParcoursHistorique2.jpg","/data/data/com.tc.mypath/app_Images/ParcoursHistorique3.jpg");
@@ -308,7 +312,7 @@ public class ParcoursActivity extends AppCompatActivity {
             }
             catch(IOException e){
                 e.printStackTrace();
-            }*/
+            }
 
             Intent myIntent = new Intent(v.getContext(), FeedbackActivity.class);
             myIntent.putExtra("time", tempsText);

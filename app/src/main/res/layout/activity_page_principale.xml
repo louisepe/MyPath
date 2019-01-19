@@ -14,12 +14,11 @@
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:gravity="center"
-        android:maxWidth="42dp"
-        android:maxHeight="42dp"
+        android:maxWidth="70dp"
+        android:maxHeight="70dp"
         android:scaleType="fitCenter"
         android:src="@drawable/logo"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="5dp"/>
+        android:layout_marginTop="20dp"/>
 
 
     <TextView
@@ -28,7 +27,7 @@
         android:layout_height="wrap_content"
         android:textSize="20dp"
         android:gravity="center"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="15dp"
         android:textColor="#f3f0ea"
         />
 
