@@ -86,7 +86,7 @@ public class ParcoursActivity extends AppCompatActivity {
     int erreur = 0;
     private RelativeLayout parcoursLayout;
     private LinearLayout boutonsLayout;
-    private ImageView parcours;
+    private TextView loading;
     private Chronometer chrono;
     private long time = 0;
     double distance;
@@ -122,6 +122,7 @@ public class ParcoursActivity extends AppCompatActivity {
         chrono = (Chronometer) findViewById(R.id.chrono);
 
         mTextView = (TextView) findViewById(R.id.test);
+        loading = (TextView) findViewById(R.id.parcoursLoading);
 
         //Localisation
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -211,7 +212,6 @@ public class ParcoursActivity extends AppCompatActivity {
         parcoursLayout = findViewById(R.id.parcoursLayout);
         boutonsLayout = findViewById(R.id.boutonsLayout);
 
-        parcours = (ImageView) findViewById(R.id.imageParcours);
 
 
     }
@@ -230,7 +230,6 @@ public class ParcoursActivity extends AppCompatActivity {
             dislike.setVisibility(View.GONE);
             stop.setVisibility(View.GONE);
             pause.setVisibility(View.VISIBLE);
-            parcours.setVisibility(View.GONE);
             chrono.setBase(SystemClock.elapsedRealtime() - time);
             chrono.start();
 
@@ -294,7 +293,7 @@ public class ParcoursActivity extends AppCompatActivity {
             time = time/1000;
             String tempsText = time/3600 + ":" + (int)((time%3600)/60) + ":" + (int)((time%3600)%60);
             chrono.stop();
-          
+
             Bitmap bmap = mapView.getDrawingCache();
             mapView.setDrawingCacheEnabled(true);
             bmap = mapView.getDrawingCache(true);
@@ -347,6 +346,8 @@ public class ParcoursActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         Log.d("Response", response);
+                        mapView.setVisibility(View.VISIBLE);
+                        loading.setVisibility(View.GONE);
                         parseCoord(response);
 
                     }
