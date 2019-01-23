@@ -25,7 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
- import android.widget.Chronometer;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -156,21 +156,20 @@ public class ParcoursActivity extends AppCompatActivity {
             public void onLocationChanged(Location location) {
                 //CE MORCEAU DE CODE PERMET DE TRACER LE CHEMIN AU FUR ET A MESURE
                 /**final ArrayList<GeoPoint> walkedPoints = new ArrayList<GeoPoint>();
-
-                GeoPoint endPoint = new GeoPoint(location);
-                walkedPoints.add(endPoint);
-                Road road = roadManager.getRoad(walkedPoints);
-                Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
-                mapView.getOverlays().add(roadOverlay);
-                mapView.invalidate();**/
+                 GeoPoint endPoint = new GeoPoint(location);
+                 walkedPoints.add(endPoint);
+                 Road road = roadManager.getRoad(walkedPoints);
+                 Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+                 mapView.getOverlays().add(roadOverlay);
+                 mapView.invalidate();**/
                 longitude = location.getLongitude();
                 latitude = location.getLatitude();
 
                 //POUR CENTRER LA CARTE SUR LES COORDONNEES ENVOYEES PAR L'API (Ca sert a rien mais ca parmet de montrer que ca marche de recup les coordonnees)
                 /**getPoint();
-                GeoPoint centerPoint = new GeoPoint(latitude,longitude);
-                mapController.setCenter(centerPoint);
-                mapController.animateTo(centerPoint);*/
+                 GeoPoint centerPoint = new GeoPoint(latitude,longitude);
+                 mapController.setCenter(centerPoint);
+                 mapController.animateTo(centerPoint);*/
                 if (relaunch == 1 && longitude!=0){
                     sendInfos(distance*1000, longitude, latitude);
                     relaunch = 0;
@@ -291,33 +290,60 @@ public class ParcoursActivity extends AppCompatActivity {
         public void onClick(View v) {
             //time = ( SystemClock.elapsedRealtime() - chrono.getBase())/1000;
             time = time/1000;
-            String tempsText = time/3600 + ":" + (int)((time%3600)/60) + ":" + (int)((time%3600)%60);
+            final String tempsText = time/3600 + ":" + (int)((time%3600)/60) + ":" + (int)((time%3600)%60);
             chrono.stop();
 
-            Bitmap bmap = mapView.getDrawingCache();
-            mapView.setDrawingCacheEnabled(true);
-            bmap = mapView.getDrawingCache(true);
-            ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
-            File file = wrapper.getDir("Images",MODE_PRIVATE);
-            renameFile("/data/data/com.tc.mypath/app_Images/ParcoursHistorique2.jpg","/data/data/com.tc.mypath/app_Images/ParcoursHistorique3.jpg");
-            renameFile("/data/data/com.tc.mypath/app_Images/ParcoursHistorique1.jpg","/data/data/com.tc.mypath/app_Images/ParcoursHistorique2.jpg");
-            file = new File(file, "ParcoursHistorique1"+".jpg");
-            try{
-                OutputStream stream= null;
-                stream = new FileOutputStream(file);
-                bmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
-                stream.flush();
+            final Dialog dialog = new Dialog(context);
+            dialog.setContentView(R.layout.save_parcours);
 
-            }
-            catch(IOException e){
-                e.printStackTrace();
-            }
+            Button yesButton = (Button) dialog.findViewById(R.id.yes);
+            Button noButton = (Button) dialog.findViewById(R.id.no);
+            final LinearLayout distanceLayout = (LinearLayout) dialog.findViewById(R.id.distanceLayout);
 
-            Intent myIntent = new Intent(v.getContext(), FeedbackActivity.class);
-            myIntent.putExtra("time", tempsText);
-            myIntent.putExtra("distance", distance);
-            myIntent.putExtra( "tempsSecondes", time);
-            startActivityForResult(myIntent,0);
+            yesButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Bitmap bmap = mapView.getDrawingCache();
+                    mapView.setDrawingCacheEnabled(true);
+                    bmap = mapView.getDrawingCache(true);
+                    ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
+                    File file = wrapper.getDir("Images",MODE_PRIVATE);
+                    renameFile("/data/data/com.tc.mypath/app_Images/ParcoursHistorique2.jpg","/data/data/com.tc.mypath/app_Images/ParcoursHistorique3.jpg");
+                    renameFile("/data/data/com.tc.mypath/app_Images/ParcoursHistorique1.jpg","/data/data/com.tc.mypath/app_Images/ParcoursHistorique2.jpg");
+                    file = new File(file, "ParcoursHistorique1"+".jpg");
+                    try{
+                        OutputStream stream= null;
+                        stream = new FileOutputStream(file);
+                        bmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+                        stream.flush();
+
+                    }
+                    catch(IOException e){
+                        e.printStackTrace();
+                    }
+                    Intent myIntent = new Intent(v.getContext(), FeedbackActivity.class);
+                    myIntent.putExtra("time", tempsText);
+                    myIntent.putExtra("distance", distance);
+                    myIntent.putExtra( "tempsSecondes", time);
+                    startActivityForResult(myIntent,0);
+                }
+            });
+
+            noButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent myIntent = new Intent(v.getContext(), FeedbackActivity.class);
+                    myIntent.putExtra("time", tempsText);
+                    myIntent.putExtra("distance", distance);
+                    myIntent.putExtra( "tempsSecondes", time);
+                    startActivityForResult(myIntent,0);
+                }
+            });
+
+            dialog.show();
+
+
+
         }
     };
 

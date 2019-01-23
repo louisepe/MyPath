@@ -74,7 +74,8 @@
         android:id="@+id/validerFeedback"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Valider le feedback "
+        android:text="Valider le feedback"
+        android:layout_marginTop="15dp"
         android:background="#ffd777"/>
 
 </LinearLayout>
